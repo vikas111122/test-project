@@ -1,0 +1,112 @@
+.planning-container {
+    color: #333;
+  }
+  
+  /* Main white container */
+  .planning-card {
+    background: white;
+    padding: 20px;
+    border-radius: 6px;
+    border: 1px solid #e0e0e0;
+    display: flex;
+    flex-direction: column;
+  }
+  
+  /* Toolbar styling */
+  .toolbar {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 15px;
+  }
+  
+  .selection-count {
+    color: #cc3300; /* TLO Orange */
+    font-size: 14px;
+  }
+  
+  .selection-count span {
+    font-weight: bold;
+  }
+  
+  .actions {
+    display: flex;
+    gap: 10px;
+  }
+  
+  .btn-secondary {
+    background: #f0f0f0;
+    border: 1px solid #ccc;
+    padding: 8px 16px;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 12px;
+    color: #333;
+  }
+  
+  .btn-secondary:hover { background: #e4e4e4; }
+  
+  /* Table Styling */
+  .table-wrapper {
+    overflow-x: auto;
+    margin-bottom: 20px;
+    border: 1px solid #e0e0e0; /* Outer table border */
+  }
+  
+  .data-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 12px;
+    text-align: center;
+  }
+  
+  .data-table th {
+    background: #f4f5f7;
+    padding: 12px;
+    border-bottom: 2px solid #ddd;
+    color: #555;
+    font-weight: bold;
+  }
+  
+  .data-table td {
+    padding: 12px;
+    border-bottom: 1px solid #eee;
+  }
+  
+  .selected-row td {
+    background-color: #fafafa;
+  }
+  
+  .bold-cell { font-weight: bold; }
+  
+  /* Footer Action Buttons */
+  .footer-actions {
+    display: flex;
+    justify-content: flex-end;
+    gap: 15px;
+    margin-top: 10px;
+  }
+  
+  .btn-cancel {
+    background: transparent;
+    border: 1px solid #ccc;
+    padding: 10px 20px;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 13px;
+  }
+  
+  .btn-cancel:hover { background: #f9f9f9; }
+  
+  .btn-primary {
+    background: #cc3300;
+    color: white;
+    border: none;
+    padding: 10px 20px;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 13px;
+    font-weight: bold;
+  }
+  
+  .btn-primary:hover { background: #a32900; }

@@ -1,0 +1,85 @@
+<div class="dashboard-container">
+    <h2 class="page-title">TLO Dashboard</h2>
+  
+    <!-- Quick Links Section -->
+    <div class="section-title">Quick Links</div>
+    <div class="quick-links-grid">
+      <div class="quick-link-card">
+        <div class="icon-box"><i class="fa-solid fa-calendar-plus"></i></div>
+        <div class="card-text">
+          <h3>Create Plan</h3>
+          <p>Create a new optimization plan for your yard</p>
+        </div>
+        <i class="fa-solid fa-chevron-right arrow"></i>
+      </div>
+      
+      <div class="quick-link-card">
+        <div class="icon-box"><i class="fa-solid fa-sliders"></i></div>
+        <div class="card-text">
+          <h3>Edit Rules</h3>
+          <p>View and manage optimization rules and constraints</p>
+        </div>
+        <i class="fa-solid fa-chevron-right arrow"></i>
+      </div>
+    </div>
+  
+    <!-- Statistics Cards Section -->
+    <div class="stats-grid">
+      <div class="stat-card">
+        <div class="stat-header">
+          <i class="fa-solid fa-train-tram"></i> Total Units in Yard
+        </div>
+        <!-- Using Angular Interpolation {{ }} to bind our TypeScript variables -->
+        <div class="stat-number">{{ totalUnits | number }}</div>
+        <div class="stat-desc">All intermodal units on terminal</div>
+      </div>
+  
+      <div class="stat-card">
+        <div class="stat-header">
+          <i class="fa-solid fa-check-circle"></i> Available for Loading
+        </div>
+        <div class="stat-number">{{ availableForLoading | number }}</div>
+        <div class="stat-desc">Units cleared for train assignment</div>
+      </div>
+  
+      <div class="stat-card">
+        <div class="stat-header">
+          <i class="fa-solid fa-ban"></i> Units on Hold
+        </div>
+        <div class="stat-number">{{ unitsOnHold | number }}</div>
+        <div class="stat-desc">Not currently available for loading</div>
+      </div>
+    </div>
+  
+    <!-- Data Table Section -->
+    <div class="table-container">
+      <div class="section-title">Containers by Destination & Car Kind</div>
+      <table class="data-table">
+        <thead>
+          <tr>
+            <th>DESTINATION</th>
+            <th>KC1</th>
+            <th>KC2</th>
+            <th>KC4</th>
+            <th>KC5</th>
+            <th>KC7</th>
+            <th>KF4</th>
+            <th>TOTAL</th>
+          </tr>
+        </thead>
+        <tbody>
+          <!-- Loop through our tableData array -->
+          <tr *ngFor="let row of tableData">
+            <td class="bold-cell">{{ row.destination }}</td>
+            <td>{{ row.kc1 }}</td>
+            <td>{{ row.kc2 }}</td>
+            <td>{{ row.kc4 }}</td>
+            <td>{{ row.kc5 }}</td>
+            <td>{{ row.kc7 }}</td>
+            <td>{{ row.kf4 }}</td>
+            <td class="bold-cell">{{ row.total }}</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>

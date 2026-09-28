@@ -1,0 +1,37 @@
+<div class="app-layout">
+    <!-- Top Header -->
+    <header class="top-header">
+      <div class="logo-area">
+        <span class="logo-tlo">TLO</span>
+        <span class="logo-sub">Train Load Optimization</span>
+      </div>
+      <div class="user-profile">
+        <i class="fa-solid fa-circle-user"></i> Super Admin User
+      </div>
+    </header>
+  
+    <div class="main-body">
+      <!-- Dark Sidebar -->
+      <aside class="sidebar">
+        <nav class="nav-menu">
+          <a routerLink="/dashboard" routerLinkActive="active" class="nav-item">
+            <i class="fa-solid fa-house"></i> Dashboard
+          </a>
+          <a routerLink="/rules" routerLinkActive="active" class="nav-item">
+            <i class="fa-solid fa-list-check"></i> Rules
+          </a>
+          <a routerLink="/planning" routerLinkActive="active" class="nav-item">
+            <i class="fa-solid fa-calendar"></i> Planning
+          </a>
+          <a routerLink="/saved-plans" routerLinkActive="active" class="nav-item">
+            <i class="fa-solid fa-clock-rotate-left"></i> Saved Plans
+          </a>
+        </nav>
+      </aside>
+  
+      <!-- Main Content Area where the Dashboard loads -->
+      <main class="content-area">
+        <router-outlet></router-outlet>
+      </main>
+    </div>
+  </div>
