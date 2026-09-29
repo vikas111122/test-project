@@ -1,85 +1,477 @@
 import { Component } from '@angular/core';
+import { CommonModule } from '@angular/common';
+import { FormsModule } from '@angular/forms';
+
+interface RailCar {
+  id: string;
+  carKind: string;
+  aarCarKind: string;
+  track: string;
+  sequence: number;
+  destination: string;
+  length: number;
+  weight: number;
+  selected: boolean;
+}
 
 @Component({
-  selector: 'app-login',
-  templateUrl: './login.component.html',
-  styleUrls: ['./login.component.scss']
+  selector: 'app-planning',
+  standalone: true,
+  imports: [CommonModule, FormsModule],
+  templateUrl: './planning.component.html',
+  styleUrls: ['./planning.component.css']
 })
-export class LoginComponent {
-  isAdmin = false;
-  showPassword = false;
+export class PlanningComponent {
+  // --- 1. STEPPER WIZARD STATE ---
+  currentStep: number = 1;
+  steps = [
+    { number: 1, label: 'Select Train' },
+    { number: 2, label: 'Configure' },
+    { number: 3, label: 'Review & Run' },
+    { number: 4, label: 'Result' }
+  ];
 
-  username = '';
-  password = '';
+  // --- 2. FILTER DROPDOWN OPTIONS ---
+  trainList = ['AZ11451', 'AZ11452', 'AZ11453'];
+  trackList = ['ALL', 'S116', 'S117', 'S118'];
+  destinationList = ['ALL', 'EL', 'KC', 'AKP'];
+  typeList = ['ALL', 'QS3', 'PS3'];
 
-  toggleRole(adminState: boolean): void {
-    this.isAdmin = adminState;
+  // --- 3. ACTIVE FILTER SELECTIONS ---
+  selectedTrain: string = 'AZ11451';
+  selectedTrack: string = 'ALL';
+  selectedDestination: string = 'ALL';
+  selectedType: string = 'ALL';
+
+  // --- 4. MASTER DATA (Simulated Database) ---
+  allRailCars: RailCar[] = [
+    { id: 'ER239600', carKind: 'QS3', aarCarKind: 'S162', track: 'S116', sequence: 1, destination: 'EL', length: 255.2, weight: 177400, selected: true },
+    { id: 'KR527957', carKind: 'PS3', aarCarKind: 'S615', track: 'S116', sequence: 2, destination: 'EL', length: 76.5, weight: 50900, selected: true },
+    { id: 'N467613', carKind: 'PS3', aarCarKind: 'S615', track: 'S116', sequence: 3, destination: 'EL', length: 76.5, weight: 54300, selected: false },
+    { id: 'N468142', carKind: 'PS3', aarCarKind: 'S615', track: 'S117', sequence: 4, destination: 'KC', length: 76.5, weight: 54300, selected: false },
+    { id: 'N646730', carKind: 'PS3', aarCarKind: 'S615', track: 'S118', sequence: 5, destination: 'AKP', length: 76.5, weight: 50800, selected: false }
+  ];
+
+  // --- 5. BUSINESS LOGIC & COMPUTED PROPERTIES ---
+
+  // Dynamically filters table rows based on selected dropdowns
+  get filteredRailCars(): RailCar[] {
+    return this.allRailCars.filter(car => {
+      const matchTrack = this.selectedTrack === 'ALL' || car.track === this.selectedTrack;
+      const matchDest = this.selectedDestination === 'ALL' || car.destination === this.selectedDestination;
+      const matchType = this.selectedType === 'ALL' || car.carKind === this.selectedType;
+      return matchTrack && matchDest && matchType;
+    });
   }
 
-  togglePasswordVisibility(): void {
-    this.showPassword = !this.showPassword;
+  // Count of currently checked rail cars
+  get selectedCount(): number {
+    return this.allRailCars.filter(car => car.selected).length;
   }
 
-  onSubmit(): void {
-    const payload = {
-      role: this.isAdmin ? 'ADMIN' : 'USER',
-      username: this.username,
-      password: this.password
-    };
-    console.log('Form Submitted:', payload);
+  // Master checkbox status
+  get allSelected(): boolean {
+    const visible = this.filteredRailCars;
+    return visible.length > 0 && visible.every(car => car.selected);
+  }
+
+  // Master checkbox toggle
+  toggleAll(event: any) {
+    const isChecked = event.target.checked;
+    this.filteredRailCars.forEach(car => car.selected = isChecked);
+  }
+
+  // Clear selections action
+  clearAll() {
+    this.allRailCars.forEach(car => car.selected = false);
+  }
+
+  // Step Navigation Logic
+  setStep(stepNum: number) {
+    this.currentStep = stepNum;
+  }
+
+  nextStep() {
+    if (this.currentStep < 4) {
+      this.currentStep++;
+    }
+  }
+
+  prevStep() {
+    if (this.currentStep > 1) {
+      this.currentStep--;
+    }
   }
 }
- html.ts
+planning.ts
 
- <div class="login-wrapper">
-  <div class="login-card">
-    
-    <!-- Logo & Header -->
-    <div class="login-header">
-      <h1 class="logo-text">TLO</h1>
-      <h2>{{ isAdmin ? 'Admin Portal' : 'Sign In' }}</h2>
-      <p>Please enter your details</p>
+.planning-container {
+  color: #333;
+  font-family: Arial, sans-serif;
+}
+
+/* Stepper Bar Styling */
+.stepper-bar {
+  display: flex;
+  background: #ffffff;
+  border-bottom: 1px solid #e0e0e0;
+  margin-bottom: 20px;
+}
+
+.step-tab {
+  padding: 12px 24px;
+  font-size: 13px;
+  color: #777;
+  cursor: pointer;
+  border-bottom: 3px solid transparent;
+  transition: all 0.2s ease;
+}
+
+.step-tab.active {
+  color: #cc3300;
+  font-weight: bold;
+  border-bottom-color: #cc3300;
+}
+
+.step-num {
+  margin-right: 4px;
+}
+
+/* Step Card Wrapper */
+.step-card {
+  background: #ffffff;
+  padding: 24px;
+  border-radius: 6px;
+  border: 1px solid #e0e0e0;
+}
+
+/* Headers */
+.page-header h2 {
+  margin: 0 0 4px 0;
+  font-size: 18px;
+  color: #222;
+}
+
+.page-header p {
+  margin: 0 0 20px 0;
+  font-size: 12px;
+  color: #777;
+}
+
+/* Filters Layout */
+.filters-section {
+  margin-bottom: 24px;
+  background: #fafafa;
+  padding: 16px;
+  border-radius: 4px;
+  border: 1px solid #eee;
+}
+
+.filter-row {
+  display: flex;
+  gap: 20px;
+  margin-bottom: 12px;
+}
+
+.inline-filters .filter-group {
+  flex: 1;
+}
+
+.filter-group {
+  display: flex;
+  flex-direction: column;
+}
+
+.filter-group label {
+  font-size: 11px;
+  font-weight: bold;
+  color: #666;
+  margin-bottom: 6px;
+}
+
+.filter-subtitle {
+  font-size: 12px;
+  color: #888;
+  margin: 12px 0 8px 0;
+}
+
+.form-control {
+  padding: 8px 12px;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  background-color: #fff;
+  font-size: 13px;
+}
+
+.select-train {
+  width: 300px;
+}
+
+/* Toolbar & Actions */
+.table-toolbar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 12px;
+}
+
+.selection-count {
+  font-size: 13px;
+  color: #555;
+}
+
+.selection-count span {
+  font-weight: bold;
+  color: #cc3300;
+}
+
+.toolbar-actions {
+  display: flex;
+  gap: 8px;
+}
+
+.btn-secondary {
+  background: #f0f0f0;
+  border: 1px solid #ccc;
+  padding: 6px 14px;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 12px;
+}
+
+.btn-secondary:hover {
+  background: #e4e4e4;
+}
+
+/* Data Table */
+.table-wrapper {
+  overflow-x: auto;
+  border: 1px solid #e0e0e0;
+  margin-bottom: 20px;
+}
+
+.data-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 12px;
+  text-align: center;
+}
+
+.data-table th {
+  background: #f4f5f7;
+  padding: 10px;
+  border-bottom: 2px solid #ddd;
+  color: #555;
+  font-size: 11px;
+}
+
+.data-table td {
+  padding: 10px;
+  border-bottom: 1px solid #eee;
+}
+
+.bold-cell {
+  font-weight: bold;
+}
+
+.no-data {
+  padding: 20px;
+  color: #888;
+}
+
+/* Footer Controls */
+.footer-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 12px;
+  padding-top: 16px;
+  border-top: 1px solid #eee;
+}
+
+.btn-cancel {
+  background: transparent;
+  border: 1px solid #ccc;
+  padding: 8px 18px;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 12px;
+}
+
+.btn-primary {
+  background: #cc3300;
+  color: #fff;
+  border: none;
+  padding: 8px 18px;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 12px;
+  font-weight: bold;
+}
+
+.btn-primary:hover {
+  background: #a32900;
+}
+
+.step-placeholder {
+  min-height: 200px;
+  padding: 20px 0;
+}
+
+
+planning.scss
+
+
+<div class="planning-container">
+
+  <!-- 1. Top Stepper Header Bar -->
+  <div class="stepper-bar">
+    <div 
+      *ngFor="let step of steps" 
+      class="step-tab" 
+      [class.active]="currentStep === step.number"
+      (click)="setStep(step.number)">
+      <span class="step-num">{{ step.number }}</span> {{ step.label }}
     </div>
+  </div>
 
-    <!-- Role Switcher Slider -->
-    <div class="role-toggle-container">
-      <div class="role-toggle-slider" [class.admin-active]="isAdmin"></div>
-      <button 
-        type="button" 
-        class="role-btn" 
-        [class.active]="!isAdmin" 
-        (click)="toggleRole(false)">
-        <i class="fa-regular fa-user"></i>
-        User
-      </button>
-      <button 
-        type="button" 
-        class="role-btn" 
-        [class.active]="isAdmin" 
-        (click)="toggleRole(true)">
-        <i class="fa-solid fa-user-shield"></i>
-        Admin
-      </button>
-    </div>
+  <!-- 2. Step Content Container -->
+  <div class="step-card">
 
-    <!-- Form -->
-    <form class="login-form" (ngSubmit)="onSubmit()">
+    <!-- STEP 1: SELECT TRAIN & RAIL CARS -->
+    <div *ngIf="currentStep === 1" class="step-content">
       
-      <!-- Username Field -->
-      <div class="input-group">
-        <i class="fa-regular fa-user icon"></i>
-        <input 
-          type="text" 
-          [(ngModel)]="username" 
-          name="username" 
-          [placeholder]="isAdmin ? 'Admin Username*' : 'Username*'" 
-          required />
+      <div class="page-header">
+        <h2>Select Rail Car / Train</h2>
+        <p>Pick a track, narrow down the railcars by Track/Destination/Type, then add them to this plan.</p>
       </div>
 
-      <!-- Password Field -->
-      <div class="input-group">
-        <i class="fa-solid fa-lock icon"></i>
-        <input 
+      <!-- Filters Section -->
+      <div class="filters-section">
+        <div class="filter-row">
+          <div class="filter-group select-train">
+            <label>Select Train</label>
+            <select [(ngModel)]="selectedTrain" class="form-control">
+              <option *ngFor="let train of trainList" [value]="train">{{ train }}</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="filter-subtitle">Set rail-car configuration</div>
+
+        <div class="filter-row inline-filters">
+          <div class="filter-group">
+            <label>TRACKS</label>
+            <select [(ngModel)]="selectedTrack" class="form-control">
+              <option *ngFor="let t of trackList" [value]="t">{{ t }}</option>
+            </select>
+          </div>
+
+          <div class="filter-group">
+            <label>DESTINATION</label>
+            <select [(ngModel)]="selectedDestination" class="form-control">
+              <option *ngFor="let d of destinationList" [value]="d">{{ d }}</option>
+            </select>
+          </div>
+
+          <div class="filter-group">
+            <label>TYPES</label>
+            <select [(ngModel)]="selectedType" class="form-control">
+              <option *ngFor="let ty of typeList" [value]="ty">{{ ty }}</option>
+            </select>
+          </div>
+        </div>
+      </div>
+
+      <!-- Table Toolbar -->
+      <div class="table-toolbar">
+        <div class="selection-count">
+          Total Rail Cars Selected: <span>{{ selectedCount }}</span>
+        </div>
+        <div class="toolbar-actions">
+          <button class="btn-secondary" (click)="clearAll()">Clear All</button>
+          <button class="btn-secondary">Add Rail Cars</button>
+        </div>
+      </div>
+
+      <!-- Rail Cars Data Table -->
+      <div class="table-wrapper">
+        <table class="data-table">
+          <thead>
+            <tr>
+              <th>
+                <input type="checkbox" [checked]="allSelected" (change)="toggleAll($event)">
+              </th>
+              <th>Rail Car #</th>
+              <th>Car Kind</th>
+              <th>AAR Carkind</th>
+              <th>Track</th>
+              <th>Sequence</th>
+              <th>Destination</th>
+              <th>Length</th>
+              <th>Weight (lbs)</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr *ngFor="let car of filteredRailCars" [class.selected-row]="car.selected">
+              <td>
+                <input type="checkbox" [(ngModel)]="car.selected">
+              </td>
+              <td class="bold-cell">{{ car.id }}</td>
+              <td>{{ car.carKind }}</td>
+              <td>{{ car.aarCarKind }}</td>
+              <td>{{ car.track }}</td>
+              <td>{{ car.sequence }}</td>
+              <td>{{ car.destination }}</td>
+              <td>{{ car.length }}</td>
+              <td>{{ car.weight | number }}</td>
+            </tr>
+            <tr *ngIf="filteredRailCars.length === 0">
+              <td colspan="9" class="no-data">No rail cars match the selected filters.</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+    </div>
+
+    <!-- STEP 2 PLACEHOLDER -->
+    <div *ngIf="currentStep === 2" class="step-placeholder">
+      <h2>2. Configuration Settings</h2>
+      <p>Configure optimization limits and load balancing rules for train {{ selectedTrain }}.</p>
+    </div>
+
+    <!-- STEP 3 PLACEHOLDER -->
+    <div *ngIf="currentStep === 3" class="step-placeholder">
+      <h2>3. Review & Run</h2>
+      <p>Review the selected {{ selectedCount }} rail cars before running the algorithm.</p>
+    </div>
+
+    <!-- STEP 4 PLACEHOLDER -->
+    <div *ngIf="currentStep === 4" class="step-placeholder">
+      <h2>4. Optimization Results</h2>
+      <p>Optimization plan successfully calculated.</p>
+    </div>
+
+    <!-- 3. Wizard Footer Navigation -->
+    <div class="footer-actions">
+      <button class="btn-cancel" *ngIf="currentStep === 1">Cancel</button>
+      <button class="btn-cancel" *ngIf="currentStep > 1" (click)="prevStep()">&larr; Back</button>
+      <button class="btn-primary" (click)="nextStep()">
+        {{ currentStep === 1 ? 'Next: Configure \u2192' : (currentStep === 4 ? 'Finish' : 'Next \u2192') }}
+      </button>
+    </div>
+
+  </div>
+
+</div>
+
+
+ planning.html
+ 
+
+
+
+
           [type]="showPassword ? 'text' : 'password'" 
           [(ngModel)]="password" 
           name="password" 
