@@ -1,4 +1,174 @@
 
+<div class="planning-wrapper">
+
+  <!-- Top Tab Bar -->
+  <div class="tabs-header">
+    @for (tab of tabs; track tab.id) {
+      <div 
+        class="tab-item" 
+        [class.active]="activeTab === tab.id"
+        (click)="selectTab(tab.id)">
+        {{ tab.name }}
+      </div>
+    }
+  </div>
+
+  <!-- Tab Panels Container -->
+  <div class="tab-content-container">
+
+    <!-- TAB 1: Select Train -->
+    @if (activeTab === 1) {
+      <div class="tab-panel">
+        <div class="page-title-area">
+          <h2>Select Rail Car / Train</h2>
+          <p>Pick a track, narrow down the railcars by track / destination / type, then add them to this plan.</p>
+        </div>
+
+        <div class="filters-card">
+          <div class="filter-row">
+            <div class="filter-field">
+              <label>Select Train</label>
+              <select [(ngModel)]="selectedTrain" class="form-select">
+                @for (train of trainList; track train) {
+                  <option [value]="train">{{ train }}</option>
+                }
+              </select>
+            </div>
+          </div>
+
+          <div class="sub-heading">Set rail-car configuration</div>
+
+          <div class="filter-row inline">
+            <div class="filter-field">
+              <label>Tracks</label>
+              <select [(ngModel)]="selectedTrack" class="form-select">
+                @for (tr of trackList; track tr) {
+                  <option [value]="tr">{{ tr }}</option>
+                }
+              </select>
+            </div>
+            <div class="filter-field">
+              <label>Destination</label>
+              <select [(ngModel)]="selectedDestination" class="form-select">
+                @for (dest of destinationList; track dest) {
+                  <option [value]="dest">{{ dest }}</option>
+                }
+              </select>
+            </div>
+            <div class="filter-field">
+              <label>Types</label>
+              <select [(ngModel)]="selectedType" class="form-select">
+                @for (ty of typeList; track ty) {
+                  <option [value]="ty">{{ ty }}</option>
+                }
+              </select>
+            </div>
+          </div>
+        </div>
+
+        <div class="table-actions-header">
+          <div class="count-label">
+            Total Rail Cars Selected: <strong>{{ selectedCount }}</strong>
+          </div>
+          <div class="btn-group">
+            <button class="btn-light" (click)="clearAll()">Clear All</button>
+            <button class="btn-light">Add Rail Cars</button>
+          </div>
+        </div>
+
+        <div class="table-container">
+          <table class="planning-table">
+            <thead>
+              <tr>
+                <th><input type="checkbox" [checked]="allSelected" (change)="toggleAll($event)"></th>
+                <th>Rail Car #</th>
+                <th>Car Kind</th>
+                <th>AAR Carkind</th>
+                <th>Track</th>
+                <th>Sequence</th>
+                <th>Destination</th>
+                <th>Length</th>
+                <th>Weight (lbs)</th>
+              </tr>
+            </thead>
+            <tbody>
+              @for (car of filteredRailCars; track car.id) {
+                <tr>
+                  <td><input type="checkbox" [(ngModel)]="car.selected"></td>
+                  <td><strong>{{ car.id }}</strong></td>
+                  <td>{{ car.carKind }}</td>
+                  <td>{{ car.aarCarKind }}</td>
+                  <td>{{ car.track }}</td>
+                  <td>{{ car.sequence }}</td>
+                  <td>{{ car.destination }}</td>
+                  <td>{{ car.length }}</td>
+                  <td>{{ car.weight | number }}</td>
+                </tr>
+              } @empty {
+                <tr>
+                  <td colspan="9" style="padding: 20px; color: #888;">No rail cars match the selected filters.</td>
+                </tr>
+              }
+            </tbody>
+          </table>
+        </div>
+
+        <div class="panel-footer">
+          <button class="btn-orange" (click)="selectTab(2)">Next: Configure &rarr;</button>
+        </div>
+      </div>
+    }
+
+    <!-- TAB 2: Configure -->
+    @if (activeTab === 2) {
+      <div class="tab-panel placeholder-panel">
+        <div class="placeholder-content">
+          <h2>2. Configure</h2>
+          <p>Configuration panel content will be built here.</p>
+        </div>
+        <div class="panel-footer">
+          <button class="btn-light" (click)="selectTab(1)">&larr; Back</button>
+          <button class="btn-orange" (click)="selectTab(3)">Next: Review & Run &rarr;</button>
+        </div>
+      </div>
+    }
+
+    <!-- TAB 3: Review & Run -->
+    @if (activeTab === 3) {
+      <div class="tab-panel placeholder-panel">
+        <div class="placeholder-content">
+          <h2>3. Review & Run</h2>
+          <p>Review & Run panel content will be built here.</p>
+        </div>
+        <div class="panel-footer">
+          <button class="btn-light" (click)="selectTab(2)">&larr; Back</button>
+          <button class="btn-orange" (click)="selectTab(4)">Next: Result &rarr;</button>
+        </div>
+      </div>
+    }
+
+    <!-- TAB 4: Result -->
+    @if (activeTab === 4) {
+      <div class="tab-panel placeholder-panel">
+        <div class="placeholder-content">
+          <h2>4. Result</h2>
+          <p>Results panel content will be built here.</p>
+        </div>
+        <div class="panel-footer">
+          <button class="btn-light" (click)="selectTab(3)">&larr; Back</button>
+        </div>
+      </div>
+    }
+
+  </div>
+
+</div>
+
+
+
+
+
+
 import { Component } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
