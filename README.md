@@ -1,3 +1,416 @@
+
+import { Component } from '@angular/core';
+import { CommonModule } from '@angular/common';
+import { FormsModule } from '@angular/forms';
+
+interface RailCar {
+  id: string;
+  carKind: string;
+  aarCarKind: string;
+  track: string;
+  sequence: number;
+  destination: string;
+  length: number;
+  weight: number;
+  selected: boolean;
+}
+
+@Component({
+  selector: 'app-planning',
+  standalone: true,
+  imports: [CommonModule, FormsModule],
+  templateUrl: './planning.html',
+  styleUrls: ['./planning.scss']
+})
+export class PlanningComponent {
+  // Active Tab State (1 = Select Train, 2 = Configure, 3 = Review & Run, 4 = Result)
+  activeTab: number = 1;
+
+  tabs = [
+    { id: 1, name: '1 Select Train' },
+    { id: 2, name: '2 Configure' },
+    { id: 3, name: '3 Review & Run' },
+    { id: 4, name: '4 Result' }
+  ];
+
+  selectTab(tabId: number) {
+    this.activeTab = tabId;
+  }
+
+  // Filter Dropdown Options
+  trainList = ['AZ11451', 'AZ11452', 'AZ11453'];
+  trackList = ['ALL', 'S116', 'S117', 'S118'];
+  destinationList = ['ALL', 'EL', 'KC', 'AKP'];
+  typeList = ['ALL', 'QS3', 'PS3'];
+
+  // Active Selections
+  selectedTrain: string = 'AZ11451';
+  selectedTrack: string = 'ALL';
+  selectedDestination: string = 'ALL';
+  selectedType: string = 'ALL';
+
+  // Table Master Data
+  allRailCars: RailCar[] = [
+    { id: 'ER239600', carKind: 'QS3', aarCarKind: 'S162', track: 'S116', sequence: 1, destination: 'EL', length: 255.2, weight: 177400, selected: true },
+    { id: 'KR527957', carKind: 'PS3', aarCarKind: 'S615', track: 'S116', sequence: 2, destination: 'EL', length: 76.5, weight: 50900, selected: true }
+  ];
+
+  // Getters
+  get filteredRailCars(): RailCar[] {
+    return this.allRailCars.filter(car => {
+      const matchTrack = this.selectedTrack === 'ALL' || car.track === this.selectedTrack;
+      const matchDest = this.selectedDestination === 'ALL' || car.destination === this.selectedDestination;
+      const matchType = this.selectedType === 'ALL' || car.carKind === this.selectedType;
+      return matchTrack && matchDest && matchType;
+    });
+  }
+
+  get selectedCount(): number {
+    return this.allRailCars.filter(car => car.selected).length;
+  }
+
+  get allSelected(): boolean {
+    const visible = this.filteredRailCars;
+    return visible.length > 0 && visible.every(car => car.selected);
+  }
+
+  // Methods
+  toggleAll(event: any) {
+    const isChecked = event.target.checked;
+    this.filteredRailCars.forEach(car => car.selected = isChecked);
+  }
+
+  clearAll() {
+    this.allRailCars.forEach(car => car.selected = false);
+  }
+}
+new planning.ts with tab 
+
+
+<div class="planning-wrapper">
+
+  <!-- Top Tab Bar -->
+  <div class="tabs-header">
+    <div 
+      *ngFor="let tab of tabs" 
+      class="tab-item" 
+      [class.active]="activeTab === tab.id"
+      (click)="selectTab(tab.id)">
+      {{ tab.name }}
+    </div>
+  </div>
+
+  <!-- Tab Panels Container -->
+  <div class="tab-content-container">
+
+    <!-- TAB 1: Select Train -->
+    <div *ngIf="activeTab === 1" class="tab-panel">
+      <div class="page-title-area">
+        <h2>Select Rail Car / Train</h2>
+        <p>Pick a track, narrow down the railcars by track / destination / type, then add them to this plan.</p>
+      </div>
+
+      <div class="filters-card">
+        <div class="filter-row">
+          <div class="filter-field">
+            <label>Select Train</label>
+            <select [(ngModel)]="selectedTrain" class="form-select">
+              <option *ngFor="let train of trainList" [value]="train">{{ train }}</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="sub-heading">Set rail-car configuration</div>
+
+        <div class="filter-row inline">
+          <div class="filter-field">
+            <label>Tracks</label>
+            <select [(ngModel)]="selectedTrack" class="form-select">
+              <option *ngFor="let tr of trackList" [value]="tr">{{ tr }}</option>
+            </select>
+          </div>
+          <div class="filter-field">
+            <label>Destination</label>
+            <select [(ngModel)]="selectedDestination" class="form-select">
+              <option *ngFor="let dest of destinationList" [value]="dest">{{ dest }}</option>
+            </select>
+          </div>
+          <div class="filter-field">
+            <label>Types</label>
+            <select [(ngModel)]="selectedType" class="form-select">
+              <option *ngFor="let ty of typeList" [value]="ty">{{ ty }}</option>
+            </select>
+          </div>
+        </div>
+      </div>
+
+      <div class="table-actions-header">
+        <div class="count-label">
+          Total Rail Cars Selected: <strong>{{ selectedCount }}</strong>
+        </div>
+        <div class="btn-group">
+          <button class="btn-light" (click)="clearAll()">Clear All</button>
+          <button class="btn-light">Add Rail Cars</button>
+        </div>
+      </div>
+
+      <div class="table-container">
+        <table class="planning-table">
+          <thead>
+            <tr>
+              <th><input type="checkbox" [checked]="allSelected" (change)="toggleAll($event)"></th>
+              <th>Rail Car #</th>
+              <th>Car Kind</th>
+              <th>AAR Carkind</th>
+              <th>Track</th>
+              <th>Sequence</th>
+              <th>Destination</th>
+              <th>Length</th>
+              <th>Weight (lbs)</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr *ngFor="let car of filteredRailCars">
+              <td><input type="checkbox" [(ngModel)]="car.selected"></td>
+              <td><strong>{{ car.id }}</strong></td>
+              <td>{{ car.carKind }}</td>
+              <td>{{ car.aarCarKind }}</td>
+              <td>{{ car.track }}</td>
+              <td>{{ car.sequence }}</td>
+              <td>{{ car.destination }}</td>
+              <td>{{ car.length }}</td>
+              <td>{{ car.weight | number }}</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <div class="panel-footer">
+        <button class="btn-orange" (click)="selectTab(2)">Next: Configure &rarr;</button>
+      </div>
+    </div>
+
+    <!-- TAB 2: Configure -->
+    <div *ngIf="activeTab === 2" class="tab-panel placeholder-panel">
+      <div class="placeholder-content">
+        <h2>2. Configure</h2>
+        <p>Configuration panel content will be built here.</p>
+      </div>
+      <div class="panel-footer">
+        <button class="btn-light" (click)="selectTab(1)">&larr; Back</button>
+        <button class="btn-orange" (click)="selectTab(3)">Next: Review & Run &rarr;</button>
+      </div>
+    </div>
+
+    <!-- TAB 3: Review & Run -->
+    <div *ngIf="activeTab === 3" class="tab-panel placeholder-panel">
+      <div class="placeholder-content">
+        <h2>3. Review & Run</h2>
+        <p>Review & Run panel content will be built here.</p>
+      </div>
+      <div class="panel-footer">
+        <button class="btn-light" (click)="selectTab(2)">&larr; Back</button>
+        <button class="btn-orange" (click)="selectTab(4)">Next: Result &rarr;</button>
+      </div>
+    </div>
+
+    <!-- TAB 4: Result -->
+    <div *ngIf="activeTab === 4" class="tab-panel placeholder-panel">
+      <div class="placeholder-content">
+        <h2>4. Result</h2>
+        <p>Results panel content will be built here.</p>
+      </div>
+      <div class="panel-footer">
+        <button class="btn-light" (click)="selectTab(3)">&larr; Back</button>
+      </div>
+    </div>
+
+  </div>
+
+</div>
+
+
+new planning.html with tabs
+
+
+
+
+.planning-wrapper {
+  padding: 10px;
+  font-family: Arial, sans-serif;
+}
+
+/* Tab Header Styling */
+.tabs-header {
+  display: flex;
+  gap: 40px;
+  border-bottom: 2px solid #e0e0e0;
+  margin-bottom: 20px;
+}
+
+.tab-item {
+  padding: 10px 0;
+  font-size: 14px;
+  color: #777;
+  cursor: pointer;
+  border-bottom: 3px solid transparent;
+  margin-bottom: -2px;
+  transition: all 0.2s ease;
+}
+
+.tab-item:hover {
+  color: #cc3300;
+}
+
+.tab-item.active {
+  color: #cc3300;
+  font-weight: bold;
+  border-bottom: 3px solid #cc3300; /* Active orange indicator bar */
+}
+
+/* Panel Layout */
+.tab-panel {
+  background: #ffffff;
+  padding: 20px;
+  border-radius: 4px;
+  border: 1px solid #e5e5e5;
+}
+
+.placeholder-panel {
+  min-height: 250px;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+}
+
+.placeholder-content h2 {
+  margin-top: 0;
+  color: #333;
+}
+
+.placeholder-content p {
+  color: #777;
+  font-size: 13px;
+}
+
+/* Form & Table Layout */
+.page-title-area h2 {
+  margin: 0 0 4px 0;
+  font-size: 18px;
+}
+
+.page-title-area p {
+  margin: 0 0 20px 0;
+  font-size: 12px;
+  color: #777;
+}
+
+.filter-row {
+  display: flex;
+  gap: 20px;
+  margin-bottom: 12px;
+}
+
+.filter-field {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  flex: 1;
+}
+
+.filter-field label {
+  font-size: 11px;
+  font-weight: bold;
+  color: #666;
+}
+
+.form-select {
+  padding: 8px 12px;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  background-color: #fff;
+  font-size: 13px;
+}
+
+.sub-heading {
+  font-size: 12px;
+  color: #777;
+  margin: 16px 0 10px 0;
+}
+
+.table-actions-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin: 20px 0 10px 0;
+  font-size: 13px;
+}
+
+.count-label strong {
+  color: #cc3300;
+}
+
+.btn-group {
+  display: flex;
+  gap: 10px;
+}
+
+.btn-light {
+  background: #f0f0f0;
+  border: 1px solid #ccc;
+  padding: 6px 14px;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 12px;
+}
+
+.btn-orange {
+  background: #cc3300;
+  color: #fff;
+  border: none;
+  padding: 8px 18px;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 13px;
+  font-weight: bold;
+}
+
+.table-container {
+  overflow-x: auto;
+  border: 1px solid #eee;
+}
+
+.planning-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 12px;
+  text-align: center;
+}
+
+.planning-table th, .planning-table td {
+  padding: 10px;
+  border-bottom: 1px solid #eee;
+}
+
+.planning-table th {
+  background: #f8f8f8;
+  color: #555;
+  font-size: 11px;
+}
+
+.panel-footer {
+  display: flex;
+  justify-content: flex-end;
+  gap: 12px;
+  margin-top: 20px;
+  padding-top: 15px;
+  border-top: 1px solid #eee;
+}
+
+
+planning.ts new code scss
+
+
 import { Component } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
